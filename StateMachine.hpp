@@ -1,0 +1,81 @@
+#pragma once
+
+#ifndef STATE_MACHINE_HPP
+
+#include <assert.h>
+#include <string>
+#include <map>
+
+class Entity;
+
+class StateMachine
+{
+public:
+    StateMachine() { NullState = AddState("null_0"); }
+    ~StateMachine() { Parent = nullptr; }
+
+    void Intialize(Entity *parent)
+    {
+        assert(parent != nullptr);
+        Parent = parent;
+    }
+
+    void Update(float delta)
+    {
+        if (State != NullState)
+        {
+            Logic(delta);
+            int transition = GetTransition(delta);
+            if (transition != NullState && transition != State)
+            {
+                SetState(transition);
+            }
+        }
+    }
+
+protected:
+    virtual void Logic(float delta) = 0;
+    virtual int GetTransition(float delta) = 0;
+    virtual void EnterState(int newState, int oldState) = 0;
+    virtual void ExitState(int oldState, int newState) = 0;
+
+    int AddState(std::string stateName)
+    {
+        auto key_value_pair = States.find(stateName);
+
+        if (key_value_pair == States.end())
+        {
+            States[stateName] = States.size();
+            return States.size();
+        }
+
+        return key_value_pair->second;
+    }
+
+    void SetState(int newState)
+    {
+        PreviousState = State;
+        State = newState;
+
+        if (PreviousState != NullState)
+        {
+            ExitState(PreviousState, newState);
+        }
+
+        if (newState != NullState)
+        {
+            EnterState(newState, PreviousState);
+        }
+    }
+
+protected:
+    Entity *Parent = nullptr;
+    std::map<std::string, int> States;
+
+public:
+    int NullState = 0;
+    int State = 0;
+    int PreviousState = 0;
+};
+
+#endif
