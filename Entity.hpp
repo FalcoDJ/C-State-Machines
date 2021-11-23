@@ -5,14 +5,21 @@
 #include "StateMachine.hpp"
 #include "olcPGEX_InputMap.h"
 
+
+// Derive a class from the abstract StateMachine base class
+// (You can call it what ever you want).
 class e_StateMachine : public StateMachine
 {
 public:
     e_StateMachine()
     {
+        // You add states to the states machine using the AddState() funciton
+        // The function returns the id of the state as an int, so make sure you save it.
         IdleState = AddState("idle");
         JumpState = AddState("jump");
         RunState = AddState("run");
+
+        // Take this opportunity to set the default state
         State = IdleState;
     }
 
@@ -23,12 +30,23 @@ public:
     friend class Entity;
 
 private:
+    // The Logic() function controls how you handle the states
+    // It's definition is below.
     void Logic(float delta) override;
+
+    // The Get transition function controls how to transition between states
     int GetTransition(float delta) override;
+
+    // You can use the functions for whatever you need, I have not defined them here.
+    // I would control my animations through these functions
     void EnterState(int newState, int oldState) override {};
     void ExitState(int oldState, int newState) override {};
 };
 
+// The class that will use the state machine has very little work to do.
+// You use this class to define what will be done, but the statemachine defines
+// how and when it will be done. The most important part is to call the StateMachine's
+// Update() function when ever you update the object.
 class Entity
 {
 public:
@@ -60,6 +78,9 @@ public:
     friend class e_StateMachine;
 
 protected:
+    // The are the functions that the StateMachine uses to control the player
+    // The player itself will not call these functions.
+
     void GetInput(float delta)
     {
         float x_input = (int)m_RightKey.IsHeld - (int)m_LeftKey.IsHeld;
@@ -91,6 +112,7 @@ protected:
     {
         return m_ShouldJump;
     }
+
 private:
     e_StateMachine m_StateMachine;
     olc::InputMap m_JumpKey;
@@ -109,28 +131,43 @@ private:
     bool m_ShouldJump = false;
 };
 
+// In the StateMachine's Logic() function you define 
+// the behavior of the player during each state.
 void e_StateMachine::Logic(float delta)
 {
+    //Always apply gravity for every state
     Parent->ApplyGravityToVelocity(delta);
 
+    // State specific logic goes inside of if conditions
+    // if (State == someState) { do some stuff }
     if (State == IdleState)
     {
         std::cout << "idle\n";
+        // Call some idle related functions
     }
     if (State == RunState)
     {
         std::cout << "run\n";
+        // Call some run related functions
     }
     if (State == JumpState)
     {
         std::cout << "jump\n";
+        // Call some jump related functions
     }
     
+    // Always move the character for every state
     Parent->Move(delta);
 }
 
+// In the StateMachine's GetTransition() function
+// you can controll the transitions of states
+// by returning an integer id for a state that
+// you want to change to (this is why we save the id of each state)
 int e_StateMachine::GetTransition(float delta)
 {
+    // You can control state specific transitions like so...
+
     if (State == IdleState && Parent->_ShouldRun())
         return RunState;
     if (State == RunState && !Parent->_ShouldRun())
@@ -141,6 +178,9 @@ int e_StateMachine::GetTransition(float delta)
     if (!Parent->_ShouldJump() && State == JumpState)
         return PreviousState;
 
+
+    // If no transition is wanted return the current 
+    // state and the StateMachine skip the transition.
     return State;
 }
 
