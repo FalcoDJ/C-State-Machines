@@ -15,17 +15,18 @@ public:
     {
         // You add states to the states machine using the AddState() funciton
         // The function returns the id of the state as an int, so make sure you save it.
-        IdleState = AddState("idle");
-        JumpState = AddState("jump");
-        RunState = AddState("run");
+        // Here I am using a pair to save both the state name key and the id
+        IdleState.first = AddState("idle"), IdleState.second = "idle";
+        JumpState.first = AddState("jump"), JumpState.second = "jump";
+        RunState.first = AddState("run"), RunState.second = "run";
 
         // Take this opportunity to set the default state
-        State = IdleState;
+        State = IdleState.first;
     }
 
-    int IdleState;
-    int JumpState;
-    int RunState;
+    std::pair<int, std::string> IdleState;
+    std::pair<int, std::string> JumpState;
+    std::pair<int, std::string> RunState;
 
     friend class Entity;
 
@@ -73,6 +74,7 @@ public:
     void Draw(olc::PixelGameEngine *pge)
     {
         pge->DrawCircle(m_Position, 8);
+        pge->DrawString(m_Position + olc::vf2d(-16.0f, -20.0f), m_CurrentState_Name);
     }
 
     friend class e_StateMachine;
@@ -129,6 +131,8 @@ private:
 
     bool m_ShouldRun = false;
     bool m_ShouldJump = false;
+
+    std::string m_CurrentState_Name = "";
 };
 
 // In the StateMachine's Logic() function you define 
@@ -140,19 +144,22 @@ void e_StateMachine::Logic(float delta)
 
     // State specific logic goes inside of if conditions
     // if (State == someState) { do some stuff }
-    if (State == IdleState)
+    if (State == IdleState.first)
     {
-        std::cout << "idle\n";
+        Parent->m_CurrentState_Name = IdleState.second;
+
         // Call some idle related functions
     }
-    if (State == RunState)
+    if (State == RunState.first)
     {
-        std::cout << "run\n";
+        Parent->m_CurrentState_Name = RunState.second;
+        
         // Call some run related functions
     }
-    if (State == JumpState)
+    if (State == JumpState.first)
     {
-        std::cout << "jump\n";
+        Parent->m_CurrentState_Name = JumpState.second;
+
         // Call some jump related functions
     }
     
@@ -168,14 +175,14 @@ int e_StateMachine::GetTransition(float delta)
 {
     // You can control state specific transitions like so...
 
-    if (State == IdleState && Parent->_ShouldRun())
-        return RunState;
-    if (State == RunState && !Parent->_ShouldRun())
-        return IdleState;
+    if (State == IdleState.first && Parent->_ShouldRun())
+        return RunState.first;
+    if (State == RunState.first && !Parent->_ShouldRun())
+        return IdleState.first;
     
     if (Parent->_ShouldJump())
-        return JumpState;
-    if (!Parent->_ShouldJump() && State == JumpState)
+        return JumpState.first;
+    if (!Parent->_ShouldJump() && State == JumpState.first)
         return PreviousState;
 
 
