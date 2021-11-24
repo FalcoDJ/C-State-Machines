@@ -77,6 +77,9 @@ public:
         pge->DrawString(m_Position + olc::vf2d(-16.0f, -20.0f), m_CurrentState_Name);
     }
 
+    // This is the most important part! Without including the 
+    // state machine class as a friend class, it doesn't have 
+    // access to the parents private/protected functions.
     friend class e_StateMachine;
 
 protected:

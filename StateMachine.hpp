@@ -40,9 +40,6 @@ public:
         }
     }
 
-    // This is the most important part! Without including the 
-    // parent class as a friend class, we do not have access
-    // to the parents private/protected functions.
     friend T;
 
 protected:
