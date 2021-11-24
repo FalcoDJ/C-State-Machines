@@ -30,11 +30,6 @@ public:
     std::pair<int, std::string> JumpState;
     std::pair<int, std::string> RunState;
 
-    // This is the most important part! Without including the 
-    // parent class as a friend class, we do not have access
-    // to the parents private/protected functions.
-    friend class Entity;
-
 private:
     // The Logic() function controls how you handle the states
     // It's definition is below.
