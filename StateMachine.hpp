@@ -6,15 +6,22 @@
 #include <string>
 #include <map>
 
-class Entity;
+struct StateMachineKey
+{
+    int Id = 0;
+    std::string Name = "";
+};
 
+bool operator == (const int &i, const StateMachineKey &smk) { return smk.Id == i; }
+
+template<typename T>
 class StateMachine
 {
 public:
     StateMachine() { NullState = AddState("null_0"); }
     ~StateMachine() { Parent = nullptr; }
 
-    void Intialize(Entity *parent)
+    void Intialize(T *parent)
     {
         assert(parent != nullptr);
         Parent = parent;
@@ -69,7 +76,7 @@ protected:
     }
 
 protected:
-    Entity *Parent = nullptr;
+    T *Parent = nullptr;
     std::map<std::string, int> States;
 
 public:

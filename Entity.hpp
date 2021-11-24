@@ -6,9 +6,11 @@
 #include "olcPGEX_InputMap.h"
 
 
+class Entity;
+
 // Derive a class from the abstract StateMachine base class
 // (You can call it what ever you want).
-class e_StateMachine : public StateMachine
+class e_StateMachine : public StateMachine<Entity>
 {
 public:
     e_StateMachine()
